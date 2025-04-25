@@ -11,20 +11,21 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: #1f2937;
+    background: #f1f1f1;
+    border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #4b5563;
-    border-radius: 3px;
+    background: #888;
+    border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+    background: #555;
 }
 
 /* Dark mode styles */
@@ -37,4 +38,102 @@
 .dark .divide-gray-200 > * { border-color: #374151; }
 .dark .bg-gray-50 { background-color: #374151; }
 .dark .hover\:bg-gray-50:hover { background-color: #4b5563; }
-.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25); } 
+.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+
+/* Responsive Tasarım */
+@media (max-width: 1024px) {
+    .flex-col {
+        height: auto;
+    }
+    
+    #map {
+        height: 50vh;
+        min-height: 300px;
+    }
+    
+    .custom-scrollbar {
+        max-height: 40vh;
+    }
+}
+
+/* Mobil Optimizasyonları */
+@media (max-width: 640px) {
+    .text-xl {
+        font-size: 1.1rem;
+    }
+    
+    .px-6 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .py-3 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .text-xs {
+        font-size: 0.7rem;
+    }
+    
+    .gap-4 {
+        gap: 0.5rem;
+    }
+    
+    .min-w-[200px] {
+        min-width: 100%;
+    }
+}
+
+/* Tablet Optimizasyonları */
+@media (min-width: 641px) and (max-width: 1024px) {
+    #map {
+        height: 40vh;
+    }
+    
+    .custom-scrollbar {
+        max-height: 45vh;
+    }
+}
+
+/* Yatay Kaydırma için Tablo */
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+/* Harita Kontrolleri */
+.leaflet-control-zoom {
+    margin: 10px !important;
+}
+
+.leaflet-control-zoom a {
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 30px !important;
+    font-size: 18px !important;
+}
+
+/* Filtreleme Alanı */
+.bg-gray-50 {
+    background-color: #f9fafb;
+}
+
+/* Tablo Başlıkları */
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f9fafb;
+}
+
+/* Mobil Menü */
+@media (max-width: 640px) {
+    .flex-wrap {
+        flex-direction: column;
+    }
+    
+    .min-w-[200px] {
+        margin-bottom: 1rem;
+    }
+} 

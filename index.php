@@ -31,9 +31,16 @@ header('Content-Type: text/html; charset=utf-8');
     </nav>
 
     <!-- Main Content -->
-    <div class="flex h-[calc(100vh-104px)]">
-        <!-- Sol Sütun - Deprem Listesi -->
-        <div class="w-1/2 p-4 overflow-hidden flex flex-col">
+    <div class="flex flex-col lg:flex-row h-[calc(100vh-104px)]">
+        <!-- Harita - Mobil ve Tablet için üstte -->
+        <div class="w-full lg:w-1/2 p-4 order-1 lg:order-2">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden h-full">
+                <div id="map" class="rounded-lg h-full"></div>
+            </div>
+        </div>
+
+        <!-- Deprem Listesi - Mobil ve Tablet için altta -->
+        <div class="w-full lg:w-1/2 p-4 order-2 lg:order-1 overflow-hidden flex flex-col">
             <div class="bg-white rounded-lg shadow-lg overflow-hidden flex-1 flex flex-col">
                 <div class="p-4 border-b flex justify-between items-center">
                     <h2 class="text-xl font-bold text-gray-900">Son Depremler</h2>
@@ -65,28 +72,23 @@ header('Content-Type: text/html; charset=utf-8');
 
                 <!-- Deprem Tablosu -->
                 <div class="flex-1 overflow-auto custom-scrollbar">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 sticky top-0">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih/Saat</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Büyüklük</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Derinlik</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Şehir</th>
-                            </tr>
-                        </thead>
-                        <tbody id="quakeList" class="bg-white divide-y divide-gray-200">
-                            <!-- JavaScript ile doldurulacak -->
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih/Saat</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Büyüklük</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Derinlik</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Şehir</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quakeList" class="bg-white divide-y divide-gray-200">
+                                <!-- JavaScript ile doldurulacak -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Sağ Sütun - Harita -->
-        <div class="w-1/2 p-4">
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden h-full">
-                <div id="map" class="rounded-lg"></div>
             </div>
         </div>
     </div>
