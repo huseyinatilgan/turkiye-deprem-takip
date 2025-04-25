@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkiye Deprem Takip Sistemi</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <style>
+        #map { height: calc(100vh - 64px); }
+        .earthquake-marker {
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            opacity: 0.6;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Dark mode styles */
+        .dark body { background-color: #111827; }
+        .dark .bg-white { background-color: #1f2937; }
+        .dark .text-gray-800 { color: #f3f4f6; }
+        .dark .text-gray-900 { color: #f3f4f6; }
+        .dark .text-gray-500 { color: #9ca3af; }
+        .dark .border-gray-200 { border-color: #374151; }
+        .dark .divide-gray-200 > * { border-color: #374151; }
+        .dark .bg-gray-50 { background-color: #374151; }
+        .dark .hover\:bg-gray-50:hover { background-color: #4b5563; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25); }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg h-16">
+        <div class="max-w-full mx-auto px-4 h-full">
+            <div class="flex justify-between items-center h-full">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-800">Türkiye Deprem Takip Sistemi</h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex h-[calc(100vh-104px)]">
+        <!-- Sol Sütun - Deprem Listesi -->
+        <div class="w-1/2 p-4 overflow-hidden flex flex-col">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden flex-1 flex flex-col">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900">Son Depremler</h2>
+                    <div class="text-sm text-gray-500">
+                        Güncelleme: <span id="countdown">60</span> saniye
+                    </div>
+                </div>
+                
+                <!-- Filtreleme -->
+                <div class="p-4 border-b bg-gray-50">
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Büyüklük</label>
+                            <select id="minMagnitude" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="0">Tümü</option>
+                                <option value="3">3.0+</option>
+                                <option value="4">4.0+</option>
+                                <option value="5">5.0+</option>
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Şehir</label>
+                            <select id="cityFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="">Tümü</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deprem Tablosu -->
+                <div class="flex-1 overflow-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih/Saat</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Büyüklük</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Derinlik</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Şehir</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quakeList" class="bg-white divide-y divide-gray-200">
+                            <!-- JavaScript ile doldurulacak -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Sütun - Harita -->
+        <div class="w-1/2 p-4">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden h-full">
+                <div id="map" class="rounded-lg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white fixed bottom-0 w-full border-t h-10">
+        <div class="max-w-full mx-auto h-full px-4">
+            <div class="flex justify-between items-center h-full">
+                <p class="text-sm text-gray-500">
+                    &copy; 2025 Hüseyin Atılgan | Açık Kaynak Proje
+                </p>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">
+                        Bu uygulama açık kaynak bir projedir. Ticari amaçla kullanılamaz. 
+                        Veriler Kandilli Rasathanesi'nden alınmaktadır. 
+                        Kullanımdan doğabilecek hiçbir sorumluluk kabul edilmemektedir.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Harita başlatma
+        const map = L.map('map').setView([39.0, 35.9], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Socket.io bağlantısı
+        const socket = io();
+
+        let allQuakes = []; // Tüm deprem verilerini saklayacak
+        let markers = []; // Tüm işaretçileri saklayacak
+
+        // Sayaç ve güncelleme fonksiyonları
+        let countdown = 60;
+        const countdownElement = document.getElementById('countdown');
+
+        function updateCountdown() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                countdown = 60;
+                fetch('/api')
+                    .then(response => response.json())
+                    .then(data => {
+                        allQuakes = data;
+                        filterQuakes();
+                    })
+                    .catch(error => {
+                        console.error('Veri güncellenirken hata oluştu:', error);
+                    });
+            }
+        }
+
+        // Her saniye sayacı güncelle
+        setInterval(updateCountdown, 1000);
+
+        // Sayfa görünür olduğunda güncellemeyi başlat, gizlendiğinde durdur
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Sayfa gizlendiğinde tüm interval'ları temizle
+                clearInterval(updateCountdown);
+            } else {
+                // Sayfa tekrar görünür olduğunda
+                countdown = 1; // Hemen güncelleme yapması için 1 yapıyoruz
+                setInterval(updateCountdown, 1000);
+            }
+        });
+
+        // İlk yükleme
+        fetch('/api')
+            .then(response => response.json())
+            .then(data => {
+                allQuakes = data;
+                updateMap();
+                updateQuakeList();
+                updateCityFilter();
+            })
+            .catch(error => {
+                console.error('Veri yüklenirken hata oluştu:', error);
+            });
+
+        function updateMap(filteredData = allQuakes) {
+            // Mevcut işaretçileri temizle
+            markers.forEach(marker => marker.remove());
+            markers = [];
+
+            // Yeni işaretçileri ekle
+            filteredData.forEach(deprem => {
+                const marker = L.circleMarker([deprem.enlem, deprem.boylam], {
+                    radius: deprem.buyukluk * 2,
+                    fillColor: getColorByMagnitude(deprem.buyukluk),
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.bindPopup(`
+                    <div class="p-2">
+                        <div class="font-bold text-lg mb-2">${deprem.buyukluk} Büyüklüğünde Deprem</div>
+                        <div class="text-sm">
+                            <p><strong>Yer:</strong> ${deprem.yer}</p>
+                            <p><strong>Tarih:</strong> ${deprem.tarih}</p>
+                            <p><strong>Saat:</strong> ${deprem.saat}</p>
+                            <p><strong>Derinlik:</strong> ${deprem.derinlik} km</p>
+                        </div>
+                    </div>
+                `);
+
+                marker.addTo(map);
+                markers.push(marker);
+            });
+        }
+
+        function updateQuakeList(filteredData = allQuakes) {
+            const quakeList = document.getElementById('quakeList');
+            quakeList.innerHTML = '';
+
+            filteredData.forEach(deprem => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 cursor-pointer transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${deprem.tarih} ${deprem.saat}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getBgColorClass(deprem.buyukluk)}">
+                            ${deprem.buyukluk}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${deprem.derinlik} km</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${deprem.yer}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${deprem.sehir || '-'}</td>
+                `;
+
+                // Satıra tıklandığında haritada o noktaya zoom yap
+                row.addEventListener('click', () => {
+                    map.setView([deprem.enlem, deprem.boylam], 8, {
+                        animate: true,
+                        duration: 1
+                    });
+                    markers.forEach(marker => {
+                        if (marker.getLatLng().lat === parseFloat(deprem.enlem) && 
+                            marker.getLatLng().lng === parseFloat(deprem.boylam)) {
+                            marker.openPopup();
+                        }
+                    });
+                });
+
+                quakeList.appendChild(row);
+            });
+        }
+
+        function updateCityFilter() {
+            const cityFilter = document.getElementById('cityFilter');
+            const cities = [...new Set(allQuakes.map(q => q.sehir).filter(Boolean))].sort();
+            
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city.replace(/[()]/g, '');
+                cityFilter.appendChild(option);
+            });
+        }
+
+        function getBgColorClass(magnitude) {
+            if (magnitude >= 5.0) return 'bg-red-100 text-red-800';
+            if (magnitude >= 4.0) return 'bg-orange-100 text-orange-800';
+            if (magnitude >= 3.0) return 'bg-yellow-100 text-yellow-800';
+            return 'bg-green-100 text-green-800';
+        }
+
+        function getColorByMagnitude(magnitude) {
+            if (magnitude >= 5.0) return '#FF0000';
+            if (magnitude >= 4.0) return '#FFA500';
+            if (magnitude >= 3.0) return '#FFFF00';
+            return '#00FF00';
+        }
+
+        // Filtreleme işlemleri
+        document.getElementById('minMagnitude').addEventListener('change', filterQuakes);
+        document.getElementById('cityFilter').addEventListener('change', filterQuakes);
+
+        function filterQuakes() {
+            const minMag = parseFloat(document.getElementById('minMagnitude').value);
+            const selectedCity = document.getElementById('cityFilter').value;
+
+            let filteredData = allQuakes;
+
+            if (minMag > 0) {
+                filteredData = filteredData.filter(q => parseFloat(q.buyukluk) >= minMag);
+            }
+
+            if (selectedCity) {
+                filteredData = filteredData.filter(q => q.sehir === selectedCity);
+            }
+
+            updateMap(filteredData);
+            updateQuakeList(filteredData);
+        }
+    </script>
+</body>
+
+</html>
