@@ -2,6 +2,10 @@
 
 Bu proje, Türkiye'deki deprem verilerini gerçek zamanlı olarak takip etmek ve görselleştirmek için geliştirilmiş bir web uygulamasıdır.
 
+## Canlı Demo
+
+Projeyi canlı olarak test edebilirsiniz: [https://huseyinatilgan.com/deprem-takip/](https://huseyinatilgan.com/deprem-takip/)
+
 ## Özellikler
 
 - Kandilli Rasathanesi'nden gerçek zamanlı deprem verileri
