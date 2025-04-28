@@ -94,18 +94,17 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
 
     <!-- Footer -->
-    <footer class="bg-white fixed bottom-0 w-full border-t h-10">
-        <div class="max-w-full mx-auto h-full px-4">
-            <div class="flex justify-between items-center h-full">
-                <p class="text-sm text-gray-500">
+    <footer class="bg-white fixed bottom-0 w-full border-t">
+        <div class="max-w-full mx-auto px-4 py-2">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+                <p class="text-sm text-gray-500 text-center md:text-left">
                     &copy; 2025 Hüseyin Atılgan | Açık Kaynak Proje
                 </p>
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-500">
+                <div class="text-center md:text-right">
+                    <p class="text-xs text-gray-500">
                         Bu uygulama açık kaynak bir projedir. Ticari amaçla kullanılamaz. 
-                        Veriler Kandilli Rasathanesi'nden alınmaktadır. 
-                        Kullanımdan doğabilecek hiçbir sorumluluk kabul edilmemektedir.
-                    </span>
+                        Veriler Kandilli Rasathanesi'nden alınmaktadır.
+                    </p>
                 </div>
             </div>
         </div>
