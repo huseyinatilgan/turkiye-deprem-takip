@@ -60,7 +60,8 @@ header('Content-Type: text/html; charset=utf-8');
                 
                 <!-- Filtreleme -->
                 <div class="p-4 border-b bg-gray-50">
-                    <div class="flex flex-wrap gap-4">
+                    <!-- Desktop için filtreleme -->
+                    <div class="hidden md:flex flex-wrap gap-4">
                         <div class="flex-1 min-w-[200px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Büyüklük</label>
                             <select id="minMagnitude" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
@@ -75,6 +76,16 @@ header('Content-Type: text/html; charset=utf-8');
                             <select id="cityFilter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                 <option value="">Tümü</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- Mobil için hızlı filtreler -->
+                    <div class="md:hidden flex items-center justify-between">
+                        <h3 class="text-sm font-medium text-gray-700">Son Depremler</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-gray-500">Güncelleme:</span>
+                            <span id="countdown" class="text-xs font-medium text-blue-600">60</span>
+                            <span class="text-xs text-gray-500">sn</span>
                         </div>
                     </div>
                 </div>
@@ -103,7 +114,7 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
 
     <!-- Footer -->
-    <footer class="bg-white fixed bottom-0 w-full border-t">
+    <footer class="bg-white border-t">
         <div class="max-w-full mx-auto px-4 py-2">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
                 <p class="text-sm text-gray-500 text-center md:text-left">

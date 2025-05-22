@@ -42,13 +42,20 @@ function fetchEarthquakes() {
                 throw new Error(`${data.error}\n\nTeknik Detaylar:\n${JSON.stringify(data.details, null, 2)}`);
             }
             allQuakes = data;
-            updateMap();
-            updateQuakeList();
-            updateCityFilter();
+            
+            // Mobil görünümde direkt tüm depremleri göster
+            if (window.innerWidth < 768) {
+                updateQuakeList(allQuakes);
+                updateMap(allQuakes);
+            } else {
+                // Desktop görünümde filtreleme yap
+                updateMap();
+                updateQuakeList();
+                updateCityFilter();
+            }
         })
         .catch(error => {
             console.error('Veri güncellenirken hata oluştu:', error);
-            // Hata mesajını kullanıcıya göster
             const quakeList = document.getElementById('quakeList');
             quakeList.innerHTML = `
                 <tr>
@@ -135,18 +142,32 @@ function updateQuakeList(filteredData = allQuakes) {
     });
 }
 
+// Şehir filtreleme butonlarını oluştur
 function updateCityFilter() {
+    const cities = [...new Set(allQuakes.map(quake => quake.sehir).filter(Boolean))];
     const cityFilter = document.getElementById('cityFilter');
-    cityFilter.innerHTML = '<option value="">Tümü</option>';
+    const cityButtons = document.getElementById('cityButtons');
     
-    const cities = [...new Set(allQuakes.map(q => q.sehir).filter(Boolean))].sort();
+    // Desktop için dropdown
+    if (cityFilter) {
+        cityFilter.innerHTML = '<option value="">Tümü</option>';
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            cityFilter.appendChild(option);
+        });
+    }
     
-    cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city.replace(/[()]/g, '');
-        cityFilter.appendChild(option);
-    });
+    // Mobil için butonlar
+    if (cityButtons) {
+        cityButtons.innerHTML = `
+            <button class="filter-btn active px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800" data-value="">Tümü</button>
+            ${cities.map(city => `
+                <button class="filter-btn px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800" data-value="${city}">${city}</button>
+            `).join('')}
+        `;
+    }
 }
 
 function getBgColorClass(magnitude) {
@@ -163,27 +184,43 @@ function getColorByMagnitude(magnitude) {
     return '#00FF00';
 }
 
-// Filtreleme işlemleri
-document.getElementById('minMagnitude').addEventListener('change', filterQuakes);
-document.getElementById('cityFilter').addEventListener('change', filterQuakes);
-
+// Filtreleme fonksiyonu
 function filterQuakes() {
-    const minMag = parseFloat(document.getElementById('minMagnitude').value);
-    const selectedCity = document.getElementById('cityFilter').value;
-
-    let filteredData = allQuakes;
-
-    if (minMag > 0) {
-        filteredData = filteredData.filter(q => parseFloat(q.buyukluk) >= minMag);
-    }
-
-    if (selectedCity) {
-        filteredData = filteredData.filter(q => q.sehir === selectedCity);
-    }
-
-    updateMap(filteredData);
-    updateQuakeList(filteredData);
+    const minMagnitude = document.getElementById('minMagnitude')?.value || 
+                        document.querySelector('.filter-btn.active[data-value]')?.dataset.value || '0';
+    const selectedCity = document.getElementById('cityFilter')?.value || 
+                        document.querySelector('.filter-btn.active[data-city]')?.dataset.city || '';
+    
+    const filteredQuakes = allQuakes.filter(quake => {
+        const magnitude = parseFloat(quake.buyukluk);
+        const city = quake.sehir;
+        
+        return magnitude >= parseFloat(minMagnitude) && 
+               (!selectedCity || city === selectedCity);
+    });
+    
+    updateQuakeList(filteredQuakes);
+    updateMap(filteredQuakes);
 }
+
+// Filtre butonları için event listener
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('filter-btn')) {
+        // Aynı gruptaki diğer butonları pasif yap
+        const buttonGroup = e.target.closest('.flex-wrap');
+        buttonGroup.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-blue-100', 'text-blue-800');
+            btn.classList.add('bg-gray-100', 'text-gray-800');
+        });
+        
+        // Tıklanan butonu aktif yap
+        e.target.classList.add('active', 'bg-blue-100', 'text-blue-800');
+        e.target.classList.remove('bg-gray-100', 'text-gray-800');
+        
+        // Filtrelemeyi güncelle
+        filterQuakes();
+    }
+});
 
 // Sayfa görünürlük kontrolü
 document.addEventListener('visibilitychange', () => {
@@ -193,6 +230,20 @@ document.addEventListener('visibilitychange', () => {
         countdown = 1; // Hemen güncelleme yapması için
         startUpdateTimer();
         fetchEarthquakes();
+    }
+});
+
+// Pencere boyutu değiştiğinde
+window.addEventListener('resize', () => {
+    if (window.innerWidth < 768) {
+        // Mobil görünüme geçildiğinde
+        updateQuakeList(allQuakes);
+        updateMap(allQuakes);
+    } else {
+        // Desktop görünüme geçildiğinde
+        updateMap();
+        updateQuakeList();
+        updateCityFilter();
     }
 });
 
